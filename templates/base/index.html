@@ -24,7 +24,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
+                    {% comment %} <li class="nav-item">
                         <a class="nav-link active" href="#">Home</a>
                     </li>
                     <li class="nav-item">
@@ -32,7 +32,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">About</a>
-                    </li>
+                    </li> {% endcomment %}
                     <li class="nav-item">
                         <a class="nav-link btn btn-outline-primary ms-lg-3 px-4 rounded-pill" href="#">Login</a>
                     </li>
@@ -67,27 +67,27 @@
                         <div class="row search-inputs g-3 mb-4">
                             <div class="col-md-4">
                                 <select class="form-select" id="courseSelect">
-                                    <option selected disabled>Select Course</option>
-                                    <option value="btech">B.Tech</option>
-                                    <option value="mtech">M.Tech</option>
-                                    <option value="bsc">B.Sc</option>
-                                    <option value="msc">M.Sc</option>
-                                    <option value="bba">BBA</option>
-                                    <option value="mba">MBA</option>
+                                    <option value=''>Select Course</option>
+                                    {% for c in course %}
+                                    <option value="{{ c.uid }}">{{ c.name }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <select class="form-select" id="sessionSelect">
-                                    <option selected disabled>Select Session</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2022">2022</option>
-                                    <option value="2021">2021</option>
-                                    <option value="2020">2020</option>
+                                    <option value=''>Select Session</option>
+                                    {% for s in session %}
+                                    <option value="{{ s.uid }}">{{ s.name }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <input type="text" class="form-control" id="subjectInput" placeholder="Enter Subject">
+                                <select class="form-select" id="subjectInput">
+                                    <option value=''>Select Subject</option>
+                                    {% for sub in subject %}
+                                    <option value="{{ sub.uid }}">{{ sub.name }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
                         <div class="text-center">
