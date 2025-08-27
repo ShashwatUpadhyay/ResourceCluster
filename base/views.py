@@ -83,3 +83,71 @@ def register_view(request):
         return redirect('home')
     
     return render(request, 'base/register.html')
+
+def upload_view(request):
+    # Get data for dropdowns
+    course = Cource.objects.all()
+    subject = Subject.objects.all()
+    session = Session.objects.all()
+    
+    context = {
+        'course': course,
+        'subject': subject,
+        'session': session,
+        'category': RESOURCE_CATEGORY,
+        'type': RESOURCE_TYPE,
+    }
+    
+    if request.method == 'POST':
+        # Get form data
+        title = request.POST.get('title')
+        resource_type = request.POST.get('resource_type')
+        course_id = request.POST.get('course')
+        subject_id = request.POST.get('subject')
+        session_id = request.POST.get('session')
+        category = request.POST.get('category')
+        description = request.POST.get('description')
+        file = request.FILES.get('file')
+        
+        # Validate file size (10MB limit)
+        if file.size > 10 * 1024 * 1024:  # 10MB in bytes
+            context['error_message'] = 'File size exceeds the maximum limit of 10MB.'
+            return render(request, 'base/upload.html', context)
+        
+        # Validate file type
+        allowed_types = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+                        'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip']
+        
+        if file.content_type not in allowed_types:
+            context['error_message'] = 'Invalid file type. Please upload a supported format.'
+            return render(request, 'base/upload.html', context)
+        
+        try:
+            # Get related objects
+            course_obj = Cource.objects.get(id=course_id)
+            subject_obj = Subject.objects.get(id=subject_id)
+            session_obj = Session.objects.get(id=session_id)
+            
+            # Create resource
+            from resource.models import Resource
+            resource = Resource.objects.create(
+                name=title,
+                type=resource_type,
+                course=course_obj,
+                subject=subject_obj,
+                session=session_obj,
+                category=category,
+                description=description,
+                file=file,
+                created_by=request.user
+            )
+            
+            context['success_message'] = 'Resource uploaded successfully!'
+            # Clear form data after successful upload
+            return render(request, 'base/upload.html', context)
+            
+        except Exception as e:
+            context['error_message'] = f'An error occurred: {str(e)}'
+            return render(request, 'base/upload.html', context)
+    
+    return render(request, 'base/upload.html', context)

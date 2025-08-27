@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Resources - QPaperHub</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        .upload-section {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+            min-height: calc(100vh - 160px);
+        }
+        
+        .upload-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .upload-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 30px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            cursor: pointer;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .custom-file-label {
+            display: inline-block;
+            padding: 8px 20px;
+            background-color: var(--light-bg);
+            border: 1px dashed var(--primary);
+            border-radius: 8px;
+            color: var(--text);
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        .custom-file-label:hover {
+            background-color: var(--light-hover);
+        }
+        
+        .progress {
+            height: 10px;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .success-message {
+            color: #28a745;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand" href="/">QPaperHub</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-primary ms-lg-3 px-4 rounded-pill" href="{% url 'login' %}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Upload Section -->
+    <section class="upload-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="upload-card">
+                        <div class="text-center mb-4">
+                            <h2 class="fw-bold">Upload Resource</h2>
+                            <p class="text-muted">Share your question papers and study materials with other students</p>
+                        </div>
+                        
+                        <form method="post" action="{% url 'upload_resource' %}" enctype="multipart/form-data" id="uploadForm">
+                            {% csrf_token %}
+                            
+                            {% if error_message %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ error_message }}
+                            </div>
+                            {% endif %}
+                            
+                            {% if success_message %}
+                            <div class="alert alert-success" role="alert">
+                                {{ success_message }}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="title" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="title" name="title" placeholder="Enter resource title" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="resource_type" class="form-label">Resource Type</label>
+                                    <select class="form-select" id="resource_type" name="resource_type" required>
+                                        <option value="" selected disabled>Select resource type</option>
+                                        {% for type_key, type_value in type %}
+                                        <option value="{{ type_key }}">{{ type_value }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4 mb-3">
+                                    <label for="course" class="form-label">Course</label>
+                                    <select class="form-select" id="course" name="course" required>
+                                        <option value="" selected disabled>Select course</option>
+                                        {% for c in course %}
+                                        <option value="{{ c.id }}">{{ c.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="subject" class="form-label">Subject</label>
+                                    <select class="form-select" id="subject" name="subject" required>
+                                        <option value="" selected disabled>Select subject</option>
+                                        {% for s in subject %}
+                                        <option value="{{ s.id }}">{{ s.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="session" class="form-label">Session</label>
+                                    <select class="form-select" id="session" name="session" required>
+                                        <option value="" selected disabled>Select session</option>
+                                        {% for s in session %}
+                                        <option value="{{ s.id }}">{{ s.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="" selected disabled>Select category</option>
+                                    {% for cat_key, cat_value in category %}
+                                    <option value="{{ cat_key }}">{{ cat_value }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Enter resource description"></textarea>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Upload File (Max 10MB)</label>
+                                <div class="file-input-wrapper">
+                                    <label for="file" class="custom-file-label" id="fileLabel">
+                                        <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                        <p class="mb-0">Drag & drop your file here or click to browse</p>
+                                        <small class="text-muted">Supported formats: PDF, DOC, DOCX, PPT, PPTX, ZIP</small>
+                                    </label>
+                                    <input type="file" class="form-control" id="file" name="file" required>
+                                </div>
+                                <div class="progress" style="display: none;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="file-info text-muted mt-2" style="display: none;"></small>
+                                <div class="error-message" id="sizeError">File size exceeds the maximum limit of 10MB.</div>
+                                <div class="error-message" id="typeError">Invalid file type. Please upload a supported format.</div>
+                                <div class="success-message" id="successMessage">File ready to upload!</div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="submit" class="btn upload-btn text-black border border-info" id="uploadButton">Upload Resource</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <p>© 2025 QPaperHub | Built for Students</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="me-3">Contact</a>
+                    <a href="#" class="me-3">Privacy Policy</a>
+                    <a href="#">Help</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('file');
+            const fileLabel = document.getElementById('fileLabel');
+            const fileInfo = document.querySelector('.file-info');
+            const progress = document.querySelector('.progress');
+            const progressBar = document.querySelector('.progress-bar');
+            const sizeError = document.getElementById('sizeError');
+            const typeError = document.getElementById('typeError');
+            const successMessage = document.getElementById('successMessage');
+            const uploadButton = document.getElementById('uploadButton');
+            const uploadForm = document.getElementById('uploadForm');
+            
+            // Max file size in bytes (10MB)
+            const maxFileSize = 10 * 1024 * 1024;
+            
+            // Supported file types
+            const supportedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip','image/jpeg','image/png','image/gif'];
+            
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                console.log(file);
+                
+                if (file) {
+                    // Reset messages
+                    sizeError.style.display = 'none';
+                    typeError.style.display = 'none';
+                    successMessage.style.display = 'none';
+                    
+                    // Check file size
+                    if (file.size > maxFileSize) {
+                        sizeError.style.display = 'block';
+                        fileInput.value = '';
+                        uploadButton.disabled = true;
+                        return;
+                    }
+                    
+                    // Check file type
+                    if (!supportedTypes.includes(file.type)) {
+                        typeError.style.display = 'block';
+                        fileInput.value = '';
+                        uploadButton.disabled = true;
+                        return;
+                    }
+                    
+                    // Update label and show file info
+                    fileLabel.innerHTML = `<i class="fas fa-file fa-2x mb-2"></i><p class="mb-0">${file.name}</p>`;
+                    fileInfo.textContent = `Size: ${formatFileSize(file.size)} | Type: ${file.type.split('/')[1].toUpperCase()}`;
+                    fileInfo.style.display = 'block';
+                    
+                    // Show progress bar with animation
+                    progress.style.display = 'block';
+                    simulateProgress();
+                    
+                    // Enable upload button and show success message
+                    uploadButton.disabled = false;
+                    successMessage.style.display = 'block';
+                } else {
+                    // Reset to default state
+                    resetFileInput();
+                }
+            });
+            
+            // Prevent form submission if file size exceeds limit
+            uploadForm.addEventListener('submit', function(e) {
+                const file = fileInput.files[0];
+                if (file && file.size > maxFileSize) {
+                    e.preventDefault();
+                    sizeError.style.display = 'block';
+                }
+            });
+            
+            // Format file size to human-readable format
+            function formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' bytes';
+                else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+                else return (bytes / 1048576).toFixed(2) + ' MB';
+            }
+            
+            // Simulate progress for visual feedback
+            function simulateProgress() {
+                let width = 0;
+                const interval = setInterval(function() {
+                    if (width >= 100) {
+                        clearInterval(interval);
+                    } else {
+                        width += 5;
+                        progressBar.style.width = width + '%';
+                    }
+                }, 50);
+            }
+            
+            // Reset file input to default state
+            function resetFileInput() {
+                fileLabel.innerHTML = `<i class="fas fa-cloud-upload-alt fa-2x mb-2"></i><p class="mb-0">Drag & drop your file here or click to browse</p><small class="text-muted">Supported formats: PDF, DOC, DOCX, PPT, PPTX, ZIP</small>`;
+                fileInfo.style.display = 'none';
+                progress.style.display = 'none';
+                progressBar.style.width = '0%';
+                sizeError.style.display = 'none';
+                typeError.style.display = 'none';
+                successMessage.style.display = 'none';
+                uploadButton.disabled = false;
+            }
+            
+            // Add drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                fileLabel.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                fileLabel.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                fileLabel.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                fileLabel.classList.add('bg-light');
+            }
+            
+            function unhighlight() {
+                fileLabel.classList.remove('bg-light');
+            }
+            
+            fileLabel.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                fileInput.files = files;
+                
+                // Trigger change event
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        });
+    </script>
+</body>
+</html>

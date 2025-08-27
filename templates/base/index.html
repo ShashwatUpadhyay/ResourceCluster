@@ -24,15 +24,14 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    {% comment %} <li class="nav-item">
-                        <a class="nav-link active" href="#">Home</a>
-                    </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Upload</a>
+                        <a class="nav-link active" aria-current="page" href="/">Home</a>
                     </li>
+                    {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#">About</a>
-                    </li> {% endcomment %}
+                        <a class="nav-link" href="{% url 'upload_resource' %}">Upload</a>
+                    </li>
+                    {% endif %}
                     {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -41,6 +40,9 @@
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             {% if user.is_authenticated and user.is_superuser %}
                                 <li><a class="dropdown-item" href="{% url "admin:index" %}">Admin</a></li>
+                            {% endif %}
+                            {% if user.is_staff %}
+                                <li><a class="dropdown-item" href="">Upload</a></li>
                             {% endif %}
                             <li><a class="dropdown-item" href="#">Profile</a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -63,8 +65,12 @@
             <div class="row align-items-center">
                 <div class="col-lg-6 mb-5 mb-lg-0">
                     <h1 class="hero-title">Find Previous Year Resource Papers Easily</h1>
-                    <p class="hero-subtitle">Helping students access past papers without the struggle</p>
+                    <p class="hero-subtitle">Helping students access past papers without the struggle through this open source project.</p>
                     <button class="btn btn-get-started" onclick="document.getElementById('Start').scrollIntoView({behavior: 'smooth'})">Get Started</button>
+                    <a href="https://github.com/ShashwatUpadhyay/ResourceCluster" target="_blank" 
+                        class="btn-get-started btn btn-dark d-inline-flex justify-content-center align-items-center gap-2 rounded-pill bg-dark text-white"> 
+                        <i class="bi bi-github"></i>Project GitHub
+                        </a>    
                 </div>
                 <div class="col-lg-6 text-center">
                     <img src="https://static.india.com/wp-content/uploads/2020/09/821578-students..giving-exam-picture-for-representation-pti.jpg?impolicy=Medium_Widthonly&w=700" alt="Student studying" class="img-fluid" style="max-height: 400px;">
