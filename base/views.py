@@ -86,6 +86,9 @@ def register_view(request):
 
 def upload_view(request):
     # Get data for dropdowns
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('login')
+    
     course = Cource.objects.all()
     subject = Subject.objects.all()
     session = Session.objects.all()
