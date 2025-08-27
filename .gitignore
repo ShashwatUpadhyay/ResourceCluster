@@ -16,7 +16,6 @@ db.sqlite3
 # Media / Static
 /media/
 staticfiles/
-static/
 *.log
 
 # Environments
@@ -38,15 +37,13 @@ Thumbs.db
 
 # Migrations (optional, keep if you want clean repo)
 **/migrations/__pycache__/
-**/migrations/*.py
-!**/migrations/__init__.py
 
 # Byte-compiled / cache
 *.pyc
 *.pyo
 *.pyd
 *.pkl
-*.pickle
+*.pickle    
 __pycache__/
 
 # Coverage / testing
