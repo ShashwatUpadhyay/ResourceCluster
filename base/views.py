@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
-from resource.models import Cource,Subject,Session
+from resource.models import Cource,Subject,Session,Tag
 from .choices import RESOURCE_CATEGORY,RESOURCE_TYPE
 # Create your views here.
 def home(request):
@@ -89,11 +89,13 @@ def upload_view(request):
     course = Cource.objects.all()
     subject = Subject.objects.all()
     session = Session.objects.all()
+    tags = Tag.objects.filter().distinct()
     
     context = {
         'course': course,
         'subject': subject,
         'session': session,
+        'tags': tags,
         'category': RESOURCE_CATEGORY,
         'type': RESOURCE_TYPE,
     }
@@ -108,7 +110,8 @@ def upload_view(request):
         category = request.POST.get('category')
         description = request.POST.get('description')
         file = request.FILES.get('file')
-        
+        tags = request.POST.getlist('tags[]')
+        print(tags)
         # Validate file size (10MB limit)
         if file.size > 10 * 1024 * 1024:  # 10MB in bytes
             context['error_message'] = 'File size exceeds the maximum limit of 10MB.'
@@ -128,6 +131,9 @@ def upload_view(request):
             subject_obj = Subject.objects.get(id=subject_id)
             session_obj = Session.objects.get(id=session_id)
             
+            # Get tags
+            tag_ids = request.POST.getlist('tags[]')
+            
             # Create resource
             from resource.models import Resource
             resource = Resource.objects.create(
@@ -141,10 +147,28 @@ def upload_view(request):
                 file=file,
                 created_by=request.user
             )
+            for tag in tags:
+                tag_obj , _ = Tag.objects.get_or_create(name=tag)
+                resource.tags.add(tag_obj)
+            # Process tags (both existing and new)
+            for tag_id in tag_ids:
+                # Check if it's a numeric ID (existing tag) or a new tag name
+                if tag_id.isdigit():
+                    # Existing tag
+                    try:
+                        tag = Tag.objects.get(id=int(tag_id))
+                        resource.tags.add(tag)
+                    except Tag.DoesNotExist:
+                        pass
+                else:
+                    # New tag - create it
+                    new_tag, created = Tag.objects.get_or_create(name=tag_id)
+                    resource.tags.add(new_tag)
             
             context['success_message'] = 'Resource uploaded successfully!'
             # Clear form data after successful upload
-            return render(request, 'base/upload.html', context)
+            # return render(request, 'base/upload.html', context)
+            return redirect('upload_resource')
             
         except Exception as e:
             context['error_message'] = f'An error occurred: {str(e)}'
