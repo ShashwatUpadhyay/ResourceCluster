@@ -1,6 +1,6 @@
 from django.db import models
 from base.models import BaseModel
-from base.choices import RESOURCE_CATEGORY,RESOURCE_TYPE
+from base.choices import RESOURCE_CATEGORY,RESOURCE_TYPE,SEMESTER_CHOICE
 
 # Create your models here.
 
@@ -44,6 +44,7 @@ class Resource(BaseModel):
     category = models.CharField(max_length=255, choices=RESOURCE_CATEGORY, default='image')
     type = models.CharField(max_length=255, choices=RESOURCE_TYPE, default='note')
     course = models.ForeignKey('Cource', on_delete=models.CASCADE)
+    semester = models.CharField(max_length=255, choices=SEMESTER_CHOICE, default='1')
     subject = models.ForeignKey('Subject', on_delete=models.CASCADE)
     session = models.ForeignKey('Session', on_delete=models.CASCADE)
     

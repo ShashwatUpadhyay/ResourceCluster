@@ -207,12 +207,23 @@
                                 </div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="category" class="form-label">Category</label>
-                                <select class="form-select" id="category" name="category" required>
-                                    <option value="" selected disabled>Select category</option>
-                                    {% for cat_key, cat_value in category %}
-                                    <option value="{{ cat_key }}">{{ cat_value }}</option>
+                            <div class="mb-3 row">
+                                <div class="col-md-6">
+                                    <label for="category" class="form-label">Category</label>
+                                    <select class="form-select" id="category" name="category" required>
+                                        <option value="" selected disabled>Select category</option>
+                                        {% for cat_key, cat_value in category %}
+                                        <option value="{{ cat_key }}">{{ cat_value }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    {% comment %} input for semester {% endcomment %}
+                                    <label for="semester" class="form-label">Semester</label>
+                                <select class="form-select" id="semester" name="semester" required>
+                                    <option value="" selected disabled>Select semester</option>
+                                    {% for sem_key, sem_value in semester %}
+                                    <option value="{{ sem_key }}">{{ sem_value }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

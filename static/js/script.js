@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const courseSelect = document.getElementById('courseSelect');
     const sessionSelect = document.getElementById('sessionSelect');
     const subjectInput = document.getElementById('subjectInput');
+    const semesterInput = document.getElementById('semesterInput');
     const searchBtn = document.getElementById('searchBtn');
     const noResults = document.getElementById('noResults');
     const paperResults = document.getElementById('paperResults');
@@ -60,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <ul class="list-unstyled small text-muted mb-3">
                                 <li><strong>📘 Course:</strong> ${paper.course.toUpperCase()}</li>
                                 <li><strong>📖 Subject:</strong> ${paper.subject}</li>
+                                <li><strong>📖 Semester:</strong> ${paper.semester}</li>
                             </ul>
                              <div class="mb-3">
                                     by ${paper.created_by}
@@ -100,9 +102,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const course = courseSelect.value;
         const session = sessionSelect.value;
         const subject = subjectInput.value.toLowerCase();
-        console.log('Search criteria:', course, session, subject);
+        const semester = semesterInput.value;
+        console.log('Search criteria:', course, session, subject,semester);
         
-        const url_ = `/api/resources/?course=${course}&session=${session}&subject=${subject}`
+        const url_ = `/api/resources/?course=${course}&session=${session}&semester=${semester}&subject=${subject}`
         fetch(url_, {
             method: 'GET',
             headers: {

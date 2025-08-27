@@ -87,7 +87,7 @@
                     <div class="search-card">
                         <h3 class="text-center mb-4">Search for Resources</h3>
                         <div class="row search-inputs g-3 mb-4">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <select class="form-select" id="courseSelect">
                                     <option value=''>Select Course</option>
                                     {% for c in course %}
@@ -95,7 +95,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <select class="form-select" id="sessionSelect">
                                     <option value=''>Select Session</option>
                                     {% for s in session %}
@@ -103,11 +103,19 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <select class="form-select" id="subjectInput">
                                     <option value=''>Select Subject</option>
                                     {% for sub in subject %}
                                     <option value="{{ sub.uid }}">{{ sub.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-select" id="semesterInput">
+                                    <option value=''>Select Semester</option>
+                                    {% for sem in semester %}
+                                        <option class='text-black' value="{{ sem.0 }}">{{ sem.1 }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from resource.models import Cource,Subject,Session,Tag
-from .choices import RESOURCE_CATEGORY,RESOURCE_TYPE
+from .choices import RESOURCE_CATEGORY,RESOURCE_TYPE,SEMESTER_CHOICE
 # Create your views here.
 def home(request):
     course = Cource.objects.all()
@@ -15,6 +15,7 @@ def home(request):
         'session':session,
         'category':RESOURCE_CATEGORY,
         'type':RESOURCE_TYPE,
+        'semester':SEMESTER_CHOICE,
     }
     return render(request, 'base/index.html',data)
 
@@ -101,6 +102,7 @@ def upload_view(request):
         'tags': tags,
         'category': RESOURCE_CATEGORY,
         'type': RESOURCE_TYPE,
+        'semester':SEMESTER_CHOICE,
     }
     
     if request.method == 'POST':
@@ -114,7 +116,7 @@ def upload_view(request):
         description = request.POST.get('description')
         file = request.FILES.get('file')
         tags = request.POST.getlist('tags[]')
-        print(tags)
+        semester = request.POST.get('semester')
         # Validate file size (10MB limit)
         if file.size > 10 * 1024 * 1024:  # 10MB in bytes
             context['error_message'] = 'File size exceeds the maximum limit of 10MB.'
@@ -146,6 +148,7 @@ def upload_view(request):
                 subject=subject_obj,
                 session=session_obj,
                 category=category,
+                semester=semester,
                 description=description,
                 file=file,
                 created_by=request.user

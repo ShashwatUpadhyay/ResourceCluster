@@ -13,7 +13,8 @@ class ListResourcesAPIView(APIView):
         course = request.GET.get('course')
         subject = request.GET.get('subject')
         session = request.GET.get('session')
-        
+        semester = request.GET.get('semester')
+        print(course, subject, session, semester)
         resources = Resource.objects.all()
         if course:
             resources = resources.filter(course__uid=course)
@@ -21,6 +22,8 @@ class ListResourcesAPIView(APIView):
             resources = resources.filter(subject__uid=subject)
         if session:
             resources = resources.filter(session__uid=session)
+        if semester:
+            resources = resources.filter(semester=semester)
         serializer = ResourceSerializer(resources, many=True)
         return Response({
             'status': 200,
