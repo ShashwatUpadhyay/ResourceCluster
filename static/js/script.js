@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             <!-- Download Button -->
                             <div class="d-grid">
-                                <a href="${paper.url || paper.file}" target="_blank"  download 
+                                <a href="${paper.url || paper.file}"  download='${paper.name}'
                                 class="btn btn-danger fw-semibold rounded-pill">
                                 ⬇ Download
                                 </a>
