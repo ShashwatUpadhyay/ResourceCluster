@@ -117,8 +117,14 @@ def upload_view(request):
         file = request.FILES.get('file')
         tags = request.POST.getlist('tags[]')
         semester = request.POST.get('semester')
+        url = request.POST.get('url')
+        print(url,file)
+        if not file and not url:
+            context['error_message'] = 'Please upload a file or enter a URL.'
+            return render(request, 'base/upload.html', context)
+        
         # Validate file size (10MB limit)
-        if file.size > 10 * 1024 * 1024:  # 10MB in bytes
+        if file and file.size > 10 * 1024 * 1024:  # 10MB in bytes
             context['error_message'] = 'File size exceeds the maximum limit of 10MB.'
             return render(request, 'base/upload.html', context)
         
@@ -126,7 +132,7 @@ def upload_view(request):
         allowed_types = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
                         'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip']
         
-        if file.content_type not in allowed_types:
+        if file and file.content_type not in allowed_types:
             context['error_message'] = 'Invalid file type. Please upload a supported format.'
             return render(request, 'base/upload.html', context)
         
@@ -150,9 +156,13 @@ def upload_view(request):
                 category=category,
                 semester=semester,
                 description=description,
-                file=file,
                 created_by=request.user
             )
+            if file:
+                resource.file = file
+            else:
+                resource.url = url
+            resource.save()
             for tag in tags:
                 tag_obj , _ = Tag.objects.get_or_create(name=tag)
                 resource.tags.add(tag_obj)
@@ -174,6 +184,7 @@ def upload_view(request):
             context['success_message'] = 'Resource uploaded successfully!'
             # Clear form data after successful upload
             # return render(request, 'base/upload.html', context)
+            messages.success(request, 'Resource uploaded successfully!')
             return redirect('upload_resource')
             
         except Exception as e:

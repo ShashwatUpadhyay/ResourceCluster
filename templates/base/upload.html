@@ -244,7 +244,7 @@
                                 <div class="valid-feedback">Tags look good!</div>
                             </div>
                             
-                            <div class="mb-4">
+                            <div class="mb-4 border-top border-start border-end py-3">
                                 <label class="form-label">Upload File (Max 10MB)</label>
                                 <div class="file-input-wrapper">
                                     <label for="file" class="custom-file-label" id="fileLabel">
@@ -252,7 +252,7 @@
                                         <p class="mb-0">Drag & drop your file here or click to browse</p>
                                         <small class="text-muted">Supported formats: PDF, DOC, DOCX, PPT, PPTX, ZIP</small>
                                     </label>
-                                    <input type="file" class="form-control" id="file" name="file" required>
+                                    <input type="file" class="form-control" id="file" name="file">
                                 </div>
                                 <div class="progress" style="display: none;">
                                     <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
@@ -262,7 +262,11 @@
                                 <div class="error-message" id="typeError">Invalid file type. Please upload a supported format.</div>
                                 <div class="success-message" id="successMessage">File ready to upload!</div>
                             </div>
-                            
+                            <h3 class="text-center">OR</h3>
+                            <div class="mb-3 border-bottom border-start border-end py-3">
+                                <label for="url" class="form-label">Resource URL</label>
+                                <input type="url" class="form-control" id="url" name="url" placeholder="Enter resource URL">
+                            </div>
                             <div class="text-center">
                                 <button type="submit" class="btn upload-btn text-black border border-info" id="uploadButton">Upload Resource</button>
                             </div>
@@ -319,6 +323,7 @@
             const successMessage = document.getElementById('successMessage');
             const uploadButton = document.getElementById('uploadButton');
             const uploadForm = document.getElementById('uploadForm');
+            const urlInput = document.getElementById('url');
             
             // Max file size in bytes (10MB)
             const maxFileSize = 10 * 1024 * 1024;
@@ -373,6 +378,7 @@
             // Prevent form submission if file size exceeds limit
             uploadForm.addEventListener('submit', function(e) {
                 const file = fileInput.files[0];
+
                 if (file && file.size > maxFileSize) {
                     e.preventDefault();
                     sizeError.style.display = 'block';
@@ -450,5 +456,21 @@
             }
         });
     </script>
+
+    {% comment %} sweetalert2 {% endcomment %}
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {% if messages %}
+        {% for message in messages %}
+            <script>
+                Swal.fire({
+                    icon: '{{ message.tags }}',
+                    title: '{{ message.tags|capfirst }}',
+                    text: '{{ message }}',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            </script>
+        {% endfor %}
+    {% endif %}
 </body>
 </html>

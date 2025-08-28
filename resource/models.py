@@ -38,7 +38,8 @@ class Tag(BaseModel):
 class Resource(BaseModel):
     name = models.CharField(max_length=255)
     description = models.TextField()
-    file = models.FileField(upload_to='resources/')
+    file = models.FileField(upload_to='resources/', blank=True, null=True)
+    url = models.URLField(max_length=255, blank=True, null=True)
     tags = models.ManyToManyField('Tag')
     created_by = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     category = models.CharField(max_length=255, choices=RESOURCE_CATEGORY, default='image')
