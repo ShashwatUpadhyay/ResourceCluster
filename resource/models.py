@@ -40,7 +40,7 @@ class Tag(BaseModel):
 
 class Resource(BaseModel):
     name = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(null=True,blank=True)
     file = models.FileField(upload_to='resources/', blank=True, null=True)
     url = models.URLField(max_length=255, blank=True, null=True)
     tags = models.ManyToManyField('Tag')

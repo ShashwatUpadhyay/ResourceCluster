@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="card-body">
                             <!-- Header -->
                             <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h5 class="card-title mb-0 fw-semibold text-truncate">${paper.name}</h5>
+                                <h5 title='${paper.name}' class="card-title mb-0 fw-semibold text-truncate">${paper.name}</h5>
                                 <span class="badge bg-primary-subtle text-primary fw-semibold">${paper.session}</span>
                             </div>
 
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <li><strong>📖 Semester:</strong> ${paper.semester}</li>
                             </ul>
                              <div class="mb-3">
-                                    by ${paper.created_by}
+                                    <small class='text-sm'>by ${paper.created_by}</small>
                                 </div>
 
                             <!-- Tags -->
