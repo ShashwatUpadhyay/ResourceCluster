@@ -11,5 +11,5 @@ urlpatterns = [
     path('markdown-guide/', markdown_guide, name='markdown_guide'),
     path('mark-notifications-read/', views.mark_notifications_read, name='mark_notifications_read'),
     path('api/notifications/', views.get_latest_notifications, name='get_latest_notifications'),
-    path('api/test-notification/', views.create_test_notification, name='create_test_notification'),
+    path('api/test-notification/', views.create_notification, name='create_notification'),
 ]
