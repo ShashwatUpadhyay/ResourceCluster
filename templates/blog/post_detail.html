@@ -1,0 +1,236 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Post Header -->
+            <article class="mb-5">
+                <header class="mb-4">
+                    <h1 class="display-5 fw-bold">{{ post.title }}</h1>
+                    
+                    <!-- Post Meta -->
+                    <div class="post-meta mb-3">
+                        <div class="d-flex flex-wrap align-items-center">
+                            <span class="me-3">
+                                <i class="fas fa-user"></i> {{ post.author.username }}
+                            </span>
+                            <span class="me-3">
+                                <i class="fas fa-calendar"></i> {{ post.created_at|date:"F d, Y" }}
+                            </span>
+                            <span class="me-3">
+                                <i class="fas fa-eye"></i> {{ post.views_count }} views
+                            </span>
+                            <span class="me-3">
+                                <i class="fas fa-clock"></i> {{ post.reading_time }} min read
+                            </span>
+                            {% if post.category %}
+                                <a href="{{ post.category.get_absolute_url }}" class="badge bg-primary text-decoration-none me-2">
+                                    {{ post.category.name }}
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    {% if post.tags.all %}
+                    <div class="mb-3">
+                        {% for tag in post.tags.all %}
+                            <a href="{{ tag.get_absolute_url }}" class="tag-badge">{{ tag.name }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Edit/Delete buttons for author -->
+                    {% if user == post.author or user.is_staff %}
+                    <div class="mb-3">
+                        <a href="{{ post.get_edit_url }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="{{ post.get_delete_url }}" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
+                    {% endif %}
+                </header>
+
+                <!-- Featured Image -->
+                {% if post.featured_image %}
+                <div class="mb-4">
+                    <img src="{{ post.featured_image.url }}" class="img-fluid rounded" alt="{{ post.title }}">
+                </div>
+                {% endif %}
+
+                <!-- Post Content -->
+                <div class="post-content markdown-content">
+                    {{ post.get_markdown_content|safe }}
+                </div>
+
+                <!-- Share Buttons -->
+                <div class="mt-4 pt-4 border-top">
+                    <h6>Share this post:</h6>
+                    <div class="d-flex gap-2">
+                        <a href="https://twitter.com/intent/tweet?text={{ post.title|urlencode }}&url={{ request.build_absolute_uri }}" 
+                           target="_blank" class="btn btn-outline-info btn-sm">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" 
+                           target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fab fa-facebook"></i> Facebook
+                        </a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" 
+                           target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fab fa-linkedin"></i> LinkedIn
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Comments Section -->
+            <div class="comment-section">
+                <h4 class="mb-4">
+                    <i class="fas fa-comments"></i> Comments ({{ comments.count }})
+                </h4>
+
+                <!-- Comment Form -->
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'blog:add_comment' post.slug %}" class="mb-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ comment_form.content }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Post Comment
+                    </button>
+                </form>
+                {% else %}
+                <div class="alert alert-info">
+                    <a href="/admin/login/">Login</a> to post a comment.
+                </div>
+                {% endif %}
+
+                <!-- Comments List -->
+                {% for comment in comments %}
+                <div class="comment" id="comment-{{ comment.id }}">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <strong>{{ comment.author.username }}</strong>
+                        <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                    </div>
+                    <p class="mb-2">{{ comment.content|linebreaks }}</p>
+                    
+                    {% if user.is_authenticated %}
+                    <button class="btn btn-sm btn-outline-secondary reply-btn" data-comment-id="{{ comment.id }}">
+                        <i class="fas fa-reply"></i> Reply
+                    </button>
+                    {% endif %}
+
+                    <!-- Reply Form (hidden by default) -->
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'blog:add_comment' post.slug %}" class="reply-form mt-3" id="reply-form-{{ comment.id }}" style="display: none;">
+                        {% csrf_token %}
+                        <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                        <div class="mb-3">
+                            <textarea name="content" class="form-control" rows="3" placeholder="Write your reply..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-primary">Post Reply</button>
+                        <button type="button" class="btn btn-sm btn-secondary cancel-reply">Cancel</button>
+                    </form>
+                    {% endif %}
+
+                    <!-- Replies -->
+                    {% for reply in comment.replies.all %}
+                    <div class="comment comment-reply">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <strong>{{ reply.author.username }}</strong>
+                            <small class="text-muted">{{ reply.created_at|date:"M d, Y H:i" }}</small>
+                        </div>
+                        <p class="mb-0">{{ reply.content|linebreaks }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% empty %}
+                <p class="text-muted">No comments yet. Be the first to comment!</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Author Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">About the Author</h5>
+                </div>
+                <div class="card-body">
+                    <h6>{{ post.author.username }}</h6>
+                    <p class="text-muted">
+                        {% if post.author.first_name %}
+                            {{ post.author.first_name }} {{ post.author.last_name }}
+                        {% endif %}
+                    </p>
+                    <small class="text-muted">
+                        {{ post.author.blog_posts.count }} posts published
+                    </small>
+                </div>
+            </div>
+
+            <!-- Related Posts -->
+            {% if related_posts %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Related Posts</h5>
+                </div>
+                <div class="card-body">
+                    {% for related_post in related_posts %}
+                    <div class="mb-3">
+                        <h6 class="mb-1">
+                            <a href="{{ related_post.get_absolute_url }}" class="text-decoration-none">
+                                {{ related_post.title|truncatechars:50 }}
+                            </a>
+                        </h6>
+                        <small class="text-muted">
+                            {{ related_post.created_at|date:"M d, Y" }} • {{ related_post.views_count }} views
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Back to Posts -->
+            <div class="card">
+                <div class="card-body text-center">
+                    <a href="{% url 'blog:post_list' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Back to All Posts
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle reply buttons
+    const replyButtons = document.querySelectorAll('.reply-btn');
+    const cancelButtons = document.querySelectorAll('.cancel-reply');
+    
+    replyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const commentId = this.dataset.commentId;
+            const replyForm = document.getElementById(`reply-form-${commentId}`);
+            replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+    
+    cancelButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const replyForm = this.closest('.reply-form');
+            replyForm.style.display = 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

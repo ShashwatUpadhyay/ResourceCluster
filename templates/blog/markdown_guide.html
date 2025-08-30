@@ -1,0 +1,110 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Markdown Guide{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fab fa-markdown"></i> Markdown Writing Guide</h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Learn how to write beautiful blog posts using Markdown syntax.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>Headers</h4>
+                            <pre><code># Header 1
+## Header 2
+### Header 3
+#### Header 4</code></pre>
+                            
+                            <h4>Text Formatting</h4>
+                            <pre><code>**Bold text**
+*Italic text*
+~~Strikethrough~~
+`Inline code`</code></pre>
+                            
+                            <h4>Lists</h4>
+                            <pre><code>- Unordered list item
+- Another item
+  - Nested item
+
+1. Ordered list item
+2. Another item</code></pre>
+                            
+                            <h4>Links & Images</h4>
+                            <pre><code>[Link text](https://example.com)
+![Image alt text](image-url.jpg)</code></pre>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h4>Code Blocks</h4>
+                            <pre><code>```python
+def hello_world():
+    print("Hello, World!")
+```
+
+```javascript
+function greet(name) {
+    return `Hello, ${name}!`;
+}
+```</code></pre>
+                            
+                            <h4>Blockquotes</h4>
+                            <pre><code>> This is a blockquote
+> It can span multiple lines</code></pre>
+                            
+                            <h4>Tables</h4>
+                            <pre><code>| Column 1 | Column 2 |
+|----------|----------|
+| Cell 1   | Cell 2   |
+| Cell 3   | Cell 4   |</code></pre>
+                            
+                            <h4>Horizontal Rule</h4>
+                            <pre><code>---</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>Advanced Features</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Task Lists</h5>
+                                <pre><code>- [x] Completed task
+- [ ] Incomplete task</code></pre>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Line Breaks</h5>
+                                <pre><code>Line 1  
+Line 2 (two spaces at end of line 1)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4">
+                        <h5><i class="fas fa-lightbulb"></i> Pro Tips</h5>
+                        <ul class="mb-0">
+                            <li>Use the preview feature to see how your markdown will look</li>
+                            <li>Leave blank lines between different elements for better formatting</li>
+                            <li>Use syntax highlighting in code blocks by specifying the language</li>
+                            <li>Keep your content organized with proper headers</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'blog:post_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Start Writing
+                        </a>
+                        <a href="{% url 'blog:home' %}" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-arrow-left"></i> Back to Blog
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

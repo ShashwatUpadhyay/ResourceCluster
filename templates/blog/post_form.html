@@ -1,0 +1,973 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+{{ form.media.css }}
+<style>
+    .form-section {
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    .tag-checkbox {
+        display: inline-block;
+        margin-right: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    .preview-image {
+        max-width: 300px;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 0.25rem;
+    }
+    
+    /* Advanced Markdown Editor Styling */
+    .markdown-editor-container {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        overflow: hidden;
+        width: 100%;
+    }
+    
+    .markdown-toolbar {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+    
+    .markdown-toolbar-group {
+        display: flex;
+        gap: 0.25rem;
+        margin-right: 0.5rem;
+        padding-right: 0.5rem;
+        border-right: 1px solid #dee2e6;
+    }
+    
+    .markdown-toolbar-group:last-child {
+        border-right: none;
+        margin-right: 0;
+        padding-right: 0;
+    }
+    
+    .markdown-btn {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 0.375rem 0.5rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .markdown-btn:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .markdown-btn:active {
+        background-color: #dee2e6;
+        transform: translateY(1px);
+    }
+    
+    .markdown-btn.active {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+    
+    .markdownx {
+        border: none !important;
+        border-radius: 0;
+    }
+    
+    .markdownx-editor {
+        min-height: 500px;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 14px;
+        line-height: 1.5;
+        border: none !important;
+        resize: vertical;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+    
+    .markdownx-preview {
+        background-color: #f8f9fa;
+        border-radius: 0;
+        padding: 1rem;
+        min-height: 500px;
+        border-left: 1px solid #dee2e6;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .editor-tabs {
+        display: flex;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .editor-tab {
+        padding: 0.5rem 1rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+        color: #6c757d;
+        border-bottom: 2px solid transparent;
+    }
+    
+    .editor-tab.active {
+        color: #0d6efd;
+        border-bottom-color: #0d6efd;
+        background-color: white;
+    }
+    
+    .editor-content {
+        position: relative;
+    }
+    
+    .editor-panel {
+        display: none;
+    }
+    
+    .editor-panel.active {
+        display: block;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .markdown-toolbar {
+            padding: 0.25rem;
+        }
+        
+        .markdown-toolbar-group {
+            margin-right: 0.25rem;
+            padding-right: 0.25rem;
+        }
+        
+        .markdown-btn {
+            padding: 0.25rem;
+            min-width: 28px;
+            height: 28px;
+            font-size: 0.75rem;
+        }
+        
+        .editor-tabs {
+            flex-wrap: wrap;
+        }
+        
+        .editor-tab {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.8rem;
+        }
+        
+        .markdownx-editor {
+            min-height: 300px;
+            font-size: 13px;
+        }
+        
+        .markdownx-preview {
+            min-height: 300px;
+            font-size: 14px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .markdown-toolbar {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .markdown-toolbar-group {
+            border-right: none;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.25rem;
+            margin-bottom: 0.25rem;
+            margin-right: 0;
+            padding-right: 0;
+        }
+        
+        .markdown-toolbar-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+    }
+    
+    .markdown-guide {
+        background-color: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .markdown-guide code {
+        background-color: #fff;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+        font-size: 0.85em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-11">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>{{ title }}</h2>
+                <a href="{% if post %}{{ post.get_absolute_url }}{% else %}{% url 'blog:post_list' %}{% endif %}" 
+                   class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Cancel
+                </a>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h4 class="mb-3">Basic Information</h4>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label required-field">Title</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger small">{{ form.title.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label required-field">Status</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="text-danger small">{{ form.status.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger small">{{ form.category.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form.is_featured }}
+                                    <label for="{{ form.is_featured.id_for_label }}" class="form-check-label">
+                                        Featured Post
+                                    </label>
+                                </div>
+                                <small class="text-muted">Featured posts appear on the homepage</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Tags</label>
+                        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                            {% for choice in form.tags %}
+                                <div class="tag-checkbox">
+                                    {{ choice.tag }}
+                                    <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                        {{ choice.choice_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if form.tags.errors %}
+                            <div class="text-danger small">{{ form.tags.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="form-section">
+                    <h4 class="mb-3">Content</h4>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.content.id_for_label }}" class="form-label required-field">Content</label>
+                        
+                        <!-- Advanced Markdown Editor -->
+                        <div class="markdown-editor-container">
+                            <!-- Toolbar -->
+                            <div class="markdown-toolbar">
+                                <!-- Headings -->
+                                <div class="markdown-toolbar-group">
+                                    <button type="button" class="markdown-btn" data-action="heading" data-level="1" title="Heading 1">
+                                        <strong>H1</strong>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="heading" data-level="2" title="Heading 2">
+                                        <strong>H2</strong>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="heading" data-level="3" title="Heading 3">
+                                        <strong>H3</strong>
+                                    </button>
+                                </div>
+                                
+                                <!-- Text Formatting -->
+                                <div class="markdown-toolbar-group">
+                                    <button type="button" class="markdown-btn" data-action="bold" title="Bold">
+                                        <i class="fas fa-bold"></i>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="italic" title="Italic">
+                                        <i class="fas fa-italic"></i>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="strikethrough" title="Strikethrough">
+                                        <i class="fas fa-strikethrough"></i>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="code" title="Inline Code">
+                                        <i class="fas fa-code"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Links and Images -->
+                                <div class="markdown-toolbar-group">
+                                    <button type="button" class="markdown-btn" data-action="link" title="Link">
+                                        <i class="fas fa-link"></i>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="image" title="Image">
+                                        <i class="fas fa-image"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Lists -->
+                                <div class="markdown-toolbar-group">
+                                    <button type="button" class="markdown-btn" data-action="unordered-list" title="Bullet List">
+                                        <i class="fas fa-list-ul"></i>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="ordered-list" title="Numbered List">
+                                        <i class="fas fa-list-ol"></i>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="checklist" title="Task List">
+                                        <i class="fas fa-tasks"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Blocks -->
+                                <div class="markdown-toolbar-group">
+                                    <button type="button" class="markdown-btn" data-action="quote" title="Blockquote">
+                                        <i class="fas fa-quote-left"></i>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="code-block" title="Code Block">
+                                        <i class="fas fa-code"></i>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="table" title="Table">
+                                        <i class="fas fa-table"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Utilities -->
+                                <div class="markdown-toolbar-group">
+                                    <button type="button" class="markdown-btn" data-action="horizontal-rule" title="Horizontal Rule">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="undo" title="Undo">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="redo" title="Redo">
+                                        <i class="fas fa-redo"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- View Toggle -->
+                                <div class="markdown-toolbar-group">
+                                    <button type="button" class="markdown-btn" data-action="fullscreen" title="Fullscreen">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button type="button" class="markdown-btn" data-action="help" title="Markdown Guide">
+                                        <i class="fas fa-question-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Editor Tabs -->
+                            <div class="editor-tabs">
+                                <button type="button" class="editor-tab active" data-tab="write">
+                                    <i class="fas fa-edit"></i> Write
+                                </button>
+                                <button type="button" class="editor-tab" data-tab="preview">
+                                    <i class="fas fa-eye"></i> Preview
+                                </button>
+                            </div>
+                            
+                            <!-- Editor Content -->
+                            <div class="editor-content">
+                                <div class="editor-panel active" id="write-panel">
+                                    {{ form.content }}
+                                </div>
+                                <div class="editor-panel" id="preview-panel">
+                                    <div class="markdownx-preview" id="content-preview">
+                                        <p class="text-muted">Start typing to see preview...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if form.content.errors %}
+                            <div class="text-danger small">{{ form.content.errors.0 }}</div>
+                        {% endif %}
+                        
+                        <!-- Quick Reference (Collapsible) -->
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="collapse" data-bs-target="#markdown-guide">
+                                <i class="fab fa-markdown"></i> Markdown Quick Reference
+                            </button>
+                            <div class="collapse" id="markdown-guide">
+                                <div class="markdown-guide mt-2">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <small>
+                                                <strong>Headers:</strong><br>
+                                                <code># H1</code> <code>## H2</code> <code>### H3</code><br><br>
+                                                <strong>Text:</strong><br>
+                                                <code>**bold**</code> <code>*italic*</code> <code>~~strike~~</code><br><br>
+                                                <strong>Links:</strong><br>
+                                                <code>[text](url)</code><br>
+                                                <code>![alt](image.jpg)</code>
+                                            </small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small>
+                                                <strong>Lists:</strong><br>
+                                                <code>- item</code> <code>1. item</code> <code>- [ ] task</code><br><br>
+                                                <strong>Code:</strong><br>
+                                                <code>`inline`</code><br>
+                                                <code>```language<br>block<br>```</code><br><br>
+                                                <strong>Other:</strong><br>
+                                                <code>> quote</code> <code>---</code> (hr)
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.excerpt.id_for_label }}" class="form-label">Excerpt</label>
+                        {{ form.excerpt }}
+                        {% if form.excerpt.errors %}
+                            <div class="text-danger small">{{ form.excerpt.errors.0 }}</div>
+                        {% endif %}
+                        <small class="text-muted">Brief description that appears in post listings. If left empty, it will be auto-generated from content.</small>
+                    </div>
+                </div>
+
+                <!-- Media -->
+                <div class="form-section">
+                    <h4 class="mb-3">Featured Image</h4>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.featured_image.id_for_label }}" class="form-label">Featured Image</label>
+                        {{ form.featured_image }}
+                        {% if form.featured_image.errors %}
+                            <div class="text-danger small">{{ form.featured_image.errors.0 }}</div>
+                        {% endif %}
+                        <small class="text-muted">Upload an image to represent your post (optional)</small>
+                    </div>
+
+                    {% if post and post.featured_image %}
+                    <div class="mb-3">
+                        <label class="form-label">Current Image:</label>
+                        <div>
+                            <img src="{{ post.featured_image.url }}" alt="Current featured image" class="preview-image">
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- SEO Settings -->
+                <div class="form-section">
+                    <h4 class="mb-3">SEO Settings <small class="text-muted">(Optional)</small></h4>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.meta_title.id_for_label }}" class="form-label">Meta Title</label>
+                        {{ form.meta_title }}
+                        {% if form.meta_title.errors %}
+                            <div class="text-danger small">{{ form.meta_title.errors.0 }}</div>
+                        {% endif %}
+                        <small class="text-muted">SEO title for search engines (max 60 characters)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.meta_description.id_for_label }}" class="form-label">Meta Description</label>
+                        {{ form.meta_description }}
+                        {% if form.meta_description.errors %}
+                            <div class="text-danger small">{{ form.meta_description.errors.0 }}</div>
+                        {% endif %}
+                        <small class="text-muted">SEO description for search engines (max 160 characters)</small>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="form-section">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> {{ button_text }}
+                            </button>
+                            {% if post %}
+                                <button type="submit" name="status" value="draft" class="btn btn-outline-secondary btn-lg ms-2">
+                                    <i class="fas fa-file-alt"></i> Save as Draft
+                                </button>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <a href="{% if post %}{{ post.get_absolute_url }}{% else %}{% url 'blog:post_list' %}{% endif %}" 
+                               class="btn btn-outline-danger btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+{{ form.media.js }}
+<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the content textarea
+    const contentTextarea = document.getElementById('{{ form.content.id_for_label }}');
+    const previewDiv = document.getElementById('content-preview');
+    
+    // Markdown Editor Class
+    class MarkdownEditor {
+        constructor(textarea, preview) {
+            this.textarea = textarea;
+            this.preview = preview;
+            this.history = [];
+            this.historyIndex = -1;
+            this.isFullscreen = false;
+            
+            this.init();
+        }
+        
+        init() {
+            this.setupToolbar();
+            this.setupTabs();
+            this.setupPreview();
+            this.setupKeyboardShortcuts();
+            this.saveState();
+        }
+        
+        setupToolbar() {
+            const toolbar = document.querySelector('.markdown-toolbar');
+            toolbar.addEventListener('click', (e) => {
+                if (e.target.classList.contains('markdown-btn') || e.target.closest('.markdown-btn')) {
+                    e.preventDefault();
+                    const btn = e.target.classList.contains('markdown-btn') ? e.target : e.target.closest('.markdown-btn');
+                    this.handleToolbarAction(btn);
+                }
+            });
+        }
+        
+        setupTabs() {
+            const tabs = document.querySelectorAll('.editor-tab');
+            const panels = document.querySelectorAll('.editor-panel');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetTab = tab.dataset.tab;
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Update active panel
+                    panels.forEach(p => p.classList.remove('active'));
+                    document.getElementById(targetTab + '-panel').classList.add('active');
+                    
+                    // Update preview if switching to preview tab
+                    if (targetTab === 'preview') {
+                        this.updatePreview();
+                    }
+                });
+            });
+        }
+        
+        setupPreview() {
+            let debounceTimer;
+            this.textarea.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    if (document.querySelector('.editor-tab[data-tab="preview"]').classList.contains('active')) {
+                        this.updatePreview();
+                    }
+                }, 300);
+            });
+        }
+        
+        setupKeyboardShortcuts() {
+            this.textarea.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 'b':
+                            e.preventDefault();
+                            this.wrapSelection('**', '**');
+                            break;
+                        case 'i':
+                            e.preventDefault();
+                            this.wrapSelection('*', '*');
+                            break;
+                        case 'k':
+                            e.preventDefault();
+                            this.insertLink();
+                            break;
+                        case 'z':
+                            if (e.shiftKey) {
+                                e.preventDefault();
+                                this.redo();
+                            } else {
+                                e.preventDefault();
+                                this.undo();
+                            }
+                            break;
+                    }
+                }
+                
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    this.insertAtCursor('\t');
+                }
+            });
+        }
+        
+        handleToolbarAction(btn) {
+            const action = btn.dataset.action;
+            const level = btn.dataset.level;
+            
+            this.saveState();
+            
+            switch(action) {
+                case 'heading':
+                    this.insertHeading(parseInt(level));
+                    break;
+                case 'bold':
+                    this.wrapSelection('**', '**');
+                    break;
+                case 'italic':
+                    this.wrapSelection('*', '*');
+                    break;
+                case 'strikethrough':
+                    this.wrapSelection('~~', '~~');
+                    break;
+                case 'code':
+                    this.wrapSelection('`', '`');
+                    break;
+                case 'link':
+                    this.insertLink();
+                    break;
+                case 'image':
+                    this.insertImage();
+                    break;
+                case 'unordered-list':
+                    this.insertList('-');
+                    break;
+                case 'ordered-list':
+                    this.insertList('1.');
+                    break;
+                case 'checklist':
+                    this.insertList('- [ ]');
+                    break;
+                case 'quote':
+                    this.insertBlockquote();
+                    break;
+                case 'code-block':
+                    this.insertCodeBlock();
+                    break;
+                case 'table':
+                    this.insertTable();
+                    break;
+                case 'horizontal-rule':
+                    this.insertHorizontalRule();
+                    break;
+                case 'undo':
+                    this.undo();
+                    break;
+                case 'redo':
+                    this.redo();
+                    break;
+                case 'fullscreen':
+                    this.toggleFullscreen();
+                    break;
+                case 'help':
+                    this.showHelp();
+                    break;
+            }
+            
+            this.textarea.focus();
+        }
+        
+        getSelection() {
+            const start = this.textarea.selectionStart;
+            const end = this.textarea.selectionEnd;
+            const selectedText = this.textarea.value.substring(start, end);
+            return { start, end, selectedText };
+        }
+        
+        insertAtCursor(text) {
+            const { start } = this.getSelection();
+            const value = this.textarea.value;
+            this.textarea.value = value.substring(0, start) + text + value.substring(start);
+            this.textarea.selectionStart = this.textarea.selectionEnd = start + text.length;
+        }
+        
+        wrapSelection(before, after) {
+            const { start, end, selectedText } = this.getSelection();
+            const value = this.textarea.value;
+            const newText = before + selectedText + after;
+            this.textarea.value = value.substring(0, start) + newText + value.substring(end);
+            
+            if (selectedText) {
+                this.textarea.selectionStart = start + before.length;
+                this.textarea.selectionEnd = start + before.length + selectedText.length;
+            } else {
+                this.textarea.selectionStart = this.textarea.selectionEnd = start + before.length;
+            }
+        }
+        
+        insertHeading(level) {
+            const { start } = this.getSelection();
+            const value = this.textarea.value;
+            const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+            const lineEnd = value.indexOf('\n', start);
+            const line = value.substring(lineStart, lineEnd === -1 ? value.length : lineEnd);
+            
+            const hashes = '#'.repeat(level) + ' ';
+            const newLine = line.replace(/^#+\s*/, '') || 'Heading';
+            const newText = hashes + newLine;
+            
+            this.textarea.value = value.substring(0, lineStart) + newText + value.substring(lineEnd === -1 ? value.length : lineEnd);
+            this.textarea.selectionStart = lineStart + hashes.length;
+            this.textarea.selectionEnd = lineStart + newText.length;
+        }
+        
+        insertLink() {
+            const { selectedText } = this.getSelection();
+            const url = prompt('Enter URL:', 'https://');
+            if (url) {
+                const linkText = selectedText || 'link text';
+                this.wrapSelection(`[${linkText}](`, `${url})`);
+            }
+        }
+        
+        insertImage() {
+            const url = prompt('Enter image URL:', 'https://');
+            if (url) {
+                const alt = prompt('Enter alt text:', 'image');
+                this.insertAtCursor(`![${alt}](${url})`);
+            }
+        }
+        
+        insertList(marker) {
+            const { start } = this.getSelection();
+            const value = this.textarea.value;
+            const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+            
+            if (lineStart === 0 || value[lineStart - 1] === '\n') {
+                this.insertAtCursor(`${marker} `);
+            } else {
+                this.insertAtCursor(`\n${marker} `);
+            }
+        }
+        
+        insertBlockquote() {
+            const { start } = this.getSelection();
+            const value = this.textarea.value;
+            const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+            
+            if (lineStart === 0 || value[lineStart - 1] === '\n') {
+                this.insertAtCursor('> ');
+            } else {
+                this.insertAtCursor('\n> ');
+            }
+        }
+        
+        insertCodeBlock() {
+            const language = prompt('Enter language (optional):', 'javascript');
+            const codeBlock = `\`\`\`${language || ''}\n\n\`\`\``;
+            this.insertAtCursor(codeBlock);
+            // Position cursor inside the code block
+            const newPos = this.textarea.selectionStart - 4;
+            this.textarea.selectionStart = this.textarea.selectionEnd = newPos;
+        }
+        
+        insertTable() {
+            const table = `| Header 1 | Header 2 | Header 3 |
+|----------|----------|----------|
+| Cell 1   | Cell 2   | Cell 3   |
+| Cell 4   | Cell 5   | Cell 6   |`;
+            this.insertAtCursor('\n' + table + '\n');
+        }
+        
+        insertHorizontalRule() {
+            this.insertAtCursor('\n---\n');
+        }
+        
+        updatePreview() {
+            if (typeof marked !== 'undefined') {
+                const markdown = this.textarea.value;
+                const html = marked.parse(markdown);
+                this.preview.innerHTML = html || '<p class="text-muted">Start typing to see preview...</p>';
+            }
+        }
+        
+        saveState() {
+            this.history = this.history.slice(0, this.historyIndex + 1);
+            this.history.push({
+                value: this.textarea.value,
+                selectionStart: this.textarea.selectionStart,
+                selectionEnd: this.textarea.selectionEnd
+            });
+            this.historyIndex = this.history.length - 1;
+            
+            // Limit history size
+            if (this.history.length > 50) {
+                this.history.shift();
+                this.historyIndex--;
+            }
+        }
+        
+        undo() {
+            if (this.historyIndex > 0) {
+                this.historyIndex--;
+                const state = this.history[this.historyIndex];
+                this.textarea.value = state.value;
+                this.textarea.selectionStart = state.selectionStart;
+                this.textarea.selectionEnd = state.selectionEnd;
+            }
+        }
+        
+        redo() {
+            if (this.historyIndex < this.history.length - 1) {
+                this.historyIndex++;
+                const state = this.history[this.historyIndex];
+                this.textarea.value = state.value;
+                this.textarea.selectionStart = state.selectionStart;
+                this.textarea.selectionEnd = state.selectionEnd;
+            }
+        }
+        
+        toggleFullscreen() {
+            const container = document.querySelector('.markdown-editor-container');
+            const btn = document.querySelector('[data-action="fullscreen"] i');
+            
+            if (!this.isFullscreen) {
+                container.style.position = 'fixed';
+                container.style.top = '0';
+                container.style.left = '0';
+                container.style.width = '100vw';
+                container.style.height = '100vh';
+                container.style.zIndex = '9999';
+                container.style.backgroundColor = 'white';
+                btn.className = 'fas fa-compress';
+                this.isFullscreen = true;
+            } else {
+                container.style.position = '';
+                container.style.top = '';
+                container.style.left = '';
+                container.style.width = '';
+                container.style.height = '';
+                container.style.zIndex = '';
+                container.style.backgroundColor = '';
+                btn.className = 'fas fa-expand';
+                this.isFullscreen = false;
+            }
+        }
+        
+        showHelp() {
+            const guideCollapse = document.getElementById('markdown-guide');
+            const bsCollapse = new bootstrap.Collapse(guideCollapse, { show: true });
+        }
+    }
+    
+    // Initialize the markdown editor
+    if (contentTextarea && previewDiv) {
+        const editor = new MarkdownEditor(contentTextarea, previewDiv);
+    }
+    
+    // Character counter for meta fields
+    const metaTitle = document.getElementById('{{ form.meta_title.id_for_label }}');
+    const metaDescription = document.getElementById('{{ form.meta_description.id_for_label }}');
+    
+    function addCharacterCounter(field, maxLength) {
+        if (field) {
+            const counter = document.createElement('small');
+            counter.className = 'text-muted';
+            field.parentNode.appendChild(counter);
+            
+            function updateCounter() {
+                const remaining = maxLength - field.value.length;
+                counter.textContent = `${field.value.length}/${maxLength} characters`;
+                counter.className = remaining < 0 ? 'text-danger' : 'text-muted';
+            }
+            
+            field.addEventListener('input', updateCounter);
+            updateCounter();
+        }
+    }
+    
+    addCharacterCounter(metaTitle, 60);
+    addCharacterCounter(metaDescription, 160);
+    
+    // Image preview
+    const imageInput = document.getElementById('{{ form.featured_image.id_for_label }}');
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let preview = document.querySelector('.image-preview');
+                    if (!preview) {
+                        preview = document.createElement('div');
+                        preview.className = 'image-preview mt-2';
+                        imageInput.parentNode.appendChild(preview);
+                    }
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="preview-image">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
+{% endblock extra_js %}
+{% endblock content %}

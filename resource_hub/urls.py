@@ -25,6 +25,8 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('resource/', include('resource.urls')),
     path('staffs/', include('employee.urls')),
+    path('blog/', include('blog.urls')),
+    path('markdownx/', include('markdownx.urls')),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

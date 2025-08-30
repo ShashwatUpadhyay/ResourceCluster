@@ -45,9 +45,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'markdownx',
     'base',
     'resource',
     'employee',
+    'blog',
 ]
 
 MIDDLEWARE = [
@@ -150,3 +152,32 @@ CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
 if DEBUG:
     CSRF_TRUSTED_ORIGINS.append('http://localhost:8000')
     CSRF_TRUSTED_ORIGINS.append('http://127.0.0.1:8000')
+
+# Markdown Configuration
+MARKDOWNX_MARKDOWN_EXTENSIONS = [
+    'markdown.extensions.extra',
+    'markdown.extensions.codehilite',
+    'markdown.extensions.toc',
+    'markdown.extensions.tables',
+    'markdown.extensions.fenced_code',
+    'markdown.extensions.nl2br',
+]
+
+MARKDOWNX_MARKDOWN_EXTENSION_CONFIGS = {
+    'markdown.extensions.codehilite': {
+        'css_class': 'highlight',
+        'use_pygments': True,
+        'noclasses': True,
+    },
+    'markdown.extensions.toc': {
+        'title': 'Table of Contents',
+        'anchorlink': True,
+    },
+}
+
+# Markdown editor settings
+MARKDOWNX_EDITOR_RESIZABLE = True
+MARKDOWNX_UPLOAD_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/svg+xml']
+MARKDOWNX_IMAGE_MAX_SIZE = {'size': (500, 500), 'quality': 90}
+MARKDOWNX_UPLOAD_URLS_PATH = '/markdownx/upload/'
+MARKDOWNX_UPLOAD_MAX_SIZE = 50 * 1024 * 1024  # 50MB

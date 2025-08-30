@@ -1,0 +1,157 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="blog-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold">Welcome to Our Blog</h1>
+                <p class="lead">Discover insights, tutorials, and stories from our community</p>
+                
+                <!-- Search Form -->
+                <form method="get" action="{% url 'blog:search' %}" class="mt-4">
+                    <div class="input-group input-group-lg">
+                        <input type="text" name="q" class="form-control" placeholder="Search blog posts..." value="{{ request.GET.q }}">
+                        <button class="btn btn-light" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Featured Posts -->
+    {% if featured_posts %}
+    <section class="mb-5">
+        <h2 class="mb-4">Featured Posts</h2>
+        <div class="row">
+            {% for post in featured_posts %}
+            <div class="col-lg-4 mb-4">
+                <div class="card post-card h-100">
+                    {% if post.featured_image %}
+                        <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">
+                            <a href="{{ post.get_absolute_url }}" class="text-decoration-none">{{ post.title }}</a>
+                        </h5>
+                        <p class="card-text flex-grow-1">{{ post.excerpt|truncatewords:20 }}</p>
+                        <div class="post-meta">
+                            <small>
+                                <i class="fas fa-user"></i> {{ post.author.username }} |
+                                <i class="fas fa-calendar"></i> {{ post.created_at|date:"M d, Y" }} |
+                                <i class="fas fa-eye"></i> {{ post.views_count }} views
+                            </small>
+                        </div>
+                        {% if post.category %}
+                            <div class="mt-2">
+                                <a href="{{ post.category.get_absolute_url }}" class="badge bg-primary text-decoration-none">
+                                    {{ post.category.name }}
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <div class="row">
+        <!-- Recent Posts -->
+        <div class="col-lg-8">
+            <section>
+                <h2 class="mb-4">Recent Posts</h2>
+                {% if recent_posts %}
+                    <div class="row">
+                        {% for post in recent_posts %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card post-card h-100">
+                                {% if post.featured_image %}
+                                    <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 150px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="card-title">
+                                        <a href="{{ post.get_absolute_url }}" class="text-decoration-none">{{ post.title }}</a>
+                                    </h6>
+                                    <p class="card-text flex-grow-1 small">{{ post.excerpt|truncatewords:15 }}</p>
+                                    <div class="post-meta">
+                                        <small>
+                                            <i class="fas fa-user"></i> {{ post.author.username }} |
+                                            <i class="fas fa-calendar"></i> {{ post.created_at|date:"M d" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'blog:post_list' %}" class="btn btn-primary">View All Posts</a>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No posts available yet.</p>
+                {% endif %}
+            </section>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Categories -->
+            {% if categories %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Categories</h5>
+                </div>
+                <div class="card-body">
+                    {% for category in categories %}
+                        <a href="{{ category.get_absolute_url }}" class="d-block text-decoration-none mb-2">
+                            {{ category.name }} <span class="badge bg-secondary">{{ category.post_count }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Popular Tags -->
+            {% if popular_tags %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Popular Tags</h5>
+                </div>
+                <div class="card-body">
+                    {% for tag in popular_tags %}
+                        <a href="{{ tag.get_absolute_url }}" class="tag-badge">{{ tag.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            {% if user.is_authenticated %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'blog:post_create' %}" class="btn btn-primary btn-sm d-block mb-2">
+                        <i class="fas fa-plus"></i> Write New Post
+                    </a>
+                    <a href="{% url 'blog:my_posts' %}" class="btn btn-outline-primary btn-sm d-block">
+                        <i class="fas fa-list"></i> My Posts
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
