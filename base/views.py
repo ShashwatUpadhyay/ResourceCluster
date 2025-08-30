@@ -3,12 +3,27 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from resource.models import Cource,Subject,Session,Tag
+from base.models import Notification
 from .choices import RESOURCE_CATEGORY,RESOURCE_TYPE,SEMESTER_CHOICE
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+# Helper function to create notifications
+def create_notification(message, notification_type='system', created_by=None):
+    """Helper function to create a new notification"""
+    return Notification.objects.create(
+        message=message,
+        notification_type=notification_type,
+        created_by=created_by
+    )
+
 # Create your views here.
 def home(request):
     course = Cource.objects.all()
     subject = Subject.objects.all()
     session = Session.objects.all()
+    notification = Notification.objects.order_by('-created_at')[:5]
+    unread_count = Notification.objects.filter(is_read=False).count()
     data = {
         'course':course,
         'subject':subject,
@@ -16,8 +31,55 @@ def home(request):
         'category':RESOURCE_CATEGORY,
         'type':RESOURCE_TYPE,
         'semester':SEMESTER_CHOICE,
+        'notifications':notification,
+        'unread_count':unread_count,
     }
     return render(request, 'base/index.html',data)
+
+
+@csrf_exempt
+def mark_notifications_read(request):
+    if request.method == "POST":
+        updated_count = Notification.objects.filter(is_read=False).update(is_read=True)
+        return JsonResponse({
+            "status": "success", 
+            "message": "Notifications marked as read",
+            "updated_count": updated_count
+        })
+    return JsonResponse({"status": "error", "message": "Invalid request method"})
+
+def get_latest_notifications(request):
+    """API endpoint to get latest notifications"""
+    notifications = Notification.objects.order_by('-created_at')[:5]
+    unread_count = Notification.objects.filter(is_read=False).count()
+    
+    notifications_data = []
+    for notif in notifications:
+        notifications_data.append({
+            'id': notif.id,
+            'message': notif.message,
+            'created_at': notif.created_at.strftime('%b %d, %H:%M'),
+            'is_read': notif.is_read
+        })
+    
+    return JsonResponse({
+        'status': 'success',
+        'notifications': notifications_data,
+        'unread_count': unread_count
+    })
+
+# def create_test_notification(request):
+#     """Test endpoint to create a sample notification"""
+#     if request.user.is_authenticated and request.user.is_staff:
+#         create_notification(
+#             "🧪 Test notification created successfully!",
+#             notification_type='system',
+#             created_by=request.user
+#         )
+#         return JsonResponse({'status': 'success', 'message': 'Test notification created'})
+#     return JsonResponse({'status': 'error', 'message': 'Unauthorized'})
+
+
 
 def login_view(request):
     next_redirect = request.GET.get('next')
@@ -80,6 +142,13 @@ def register_view(request):
             password=password1,
             first_name=first_name,
             last_name=last_name
+        )
+        
+        # Create notification for new user registration
+        create_notification(
+            f"👋 Welcome! New user '{username}' has joined ResourceHub",
+            notification_type='user_registration',
+            created_by=user
         )
         
         # Log user in
@@ -186,6 +255,14 @@ def upload_view(request):
                     new_tag, created = Tag.objects.get_or_create(name=tag_id)
                     resource.tags.add(new_tag)
             
+            # Create notification for new resource upload
+            notification_message = f"📚 New {resource_type} uploaded: '{title}' for {course_obj.name} - {subject_obj.name} ({session_obj.name})"
+            create_notification(
+                notification_message,
+                notification_type='resource_upload',
+                created_by=request.user
+            )
+            
             context['success_message'] = 'Resource uploaded successfully!'
             # Clear form data after successful upload
             # return render(request, 'base/upload.html', context)
@@ -197,3 +274,8 @@ def upload_view(request):
             return render(request, 'base/upload.html', context)
     
     return render(request, 'base/upload.html', context)
+
+
+
+
+

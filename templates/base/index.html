@@ -57,6 +57,54 @@
                         <a class="nav-link btn btn-outline-primary ms-lg-3 px-4 rounded-pill" href="{% url 'login' %}">Login</a>
                     </li>
                     {% endif %}
+                    <li class="nav-item dropdown me-3">
+                    <a class="nav-link position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- Bell Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" 
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" 
+                            style="width:24px; height:24px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" 
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 
+                                6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 
+                                6.165 6 8.388 6 11v3.159c0 .538-.214 
+                                1.055-.595 1.436L4 17h5m6 0v1a3 3 0 
+                                11-6 0v-1m6 0H9"/>
+                        </svg>
+
+                        <!-- Red dot for unread (hide/show via JS or condition) -->
+                        {% if unread_count > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                            <span class="visually-hidden">New alerts</span>
+                        </span>
+                        {% endif %}
+                    </a>
+
+                    <!-- Dropdown -->
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg p-2" aria-labelledby="notifDropdown" style="width: 500px;">
+
+                        <!-- Dropdown header -->
+                        <li class="px-3 py-2 fw-bold text-gray-700 border-bottom">Notifications</li>
+
+                        <!-- Notifications list -->
+                        {% if notifications %}
+                            {% for noti in notifications %}
+                                <li>
+                                    <a class="dropdown-item text-sm py-2" href="#">
+                                        {{ noti.message }}
+                                        <br>
+                                        <small class="text-muted">{{ noti.created_at|date:"M d, H:i" }}</small>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li><span class="dropdown-item-text text-sm text-muted">No new notifications</span></li>
+                        {% endif %}
+
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-center text-primary fw-semibold" href="#" onclick="refreshNotifications()">🔄 Refresh</a></li>
+                    </ul>
+                </li>
+
                 </ul>
             </div>
         </div>
@@ -199,5 +247,125 @@
     
     <!-- Custom JavaScript for Search Functionality -->
     <script src="{% static 'js/script.js' %}"></script>
+    
+    <!-- Notification handling script -->
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Function to refresh notifications manually
+        function refreshNotifications() {
+            updateNotifications();
+        }
+
+        // Function to update notifications display
+        function updateNotifications() {
+            fetch("{% url 'get_latest_notifications' %}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Update unread count and red dot
+                        const redDot = document.querySelector("#notifDropdown .bg-danger");
+                        if (data.unread_count > 0) {
+                            if (!redDot) {
+                                // Add red dot if it doesn't exist
+                                const bellIcon = document.querySelector("#notifDropdown");
+                                const newRedDot = document.createElement('span');
+                                newRedDot.className = 'position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle';
+                                newRedDot.innerHTML = '<span class="visually-hidden">New alerts</span>';
+                                bellIcon.appendChild(newRedDot);
+                            }
+                        } else {
+                            if (redDot) {
+                                redDot.remove();
+                            }
+                        }
+
+                        // Update notifications list
+                        const notificationsList = document.querySelector('.dropdown-menu[aria-labelledby="notifDropdown"]');
+                        if (notificationsList) {
+                            // Clear existing notifications (keep header and footer)
+                            const existingItems = notificationsList.querySelectorAll('li:not(:first-child):not(:last-child):not(:nth-last-child(2))');
+                            existingItems.forEach(item => item.remove());
+
+                            // Add new notifications
+                            const headerItem = notificationsList.querySelector('li:first-child');
+                            data.notifications.forEach(notif => {
+                                const listItem = document.createElement('li');
+                                listItem.innerHTML = `
+                                    <a class="dropdown-item text-sm py-2" href="#">
+                                        ${notif.message}
+                                        <br>
+                                        <small class="text-muted">${notif.created_at}</small>
+                                    </a>
+                                `;
+                                headerItem.insertAdjacentElement('afterend', listItem);
+                            });
+
+                            // If no notifications, show message
+                            if (data.notifications.length === 0) {
+                                const noNotifItem = document.createElement('li');
+                                noNotifItem.innerHTML = '<span class="dropdown-item-text text-sm text-muted">No new notifications</span>';
+                                headerItem.insertAdjacentElement('afterend', noNotifItem);
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching notifications:', error);
+                });
+        }
+
+        // Mark notifications as read when dropdown is clicked
+        document.addEventListener('DOMContentLoaded', function() {
+            const notifDropdown = document.getElementById("notifDropdown");
+            if (notifDropdown) {
+                notifDropdown.addEventListener("click", function() {
+                    fetch("{% url 'mark_notifications_read' %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": getCookie("csrftoken"),
+                            "Content-Type": "application/json",
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            // Hide the red dot immediately
+                            const redDot = document.querySelector("#notifDropdown .bg-danger");
+                            if (redDot) {
+                                redDot.remove();
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error marking notifications as read:', error);
+                    });
+                });
+            }
+
+            // Update notifications every 30 seconds
+            setInterval(updateNotifications, 30000);
+            
+            // Also update notifications when page becomes visible again
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    updateNotifications();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
