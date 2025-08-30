@@ -94,7 +94,7 @@ def post_detail(request, slug):
     return render(request, 'blog/post_detail.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 def post_create(request):
     """Create a new blog post"""
     if request.method == 'POST':
@@ -116,7 +116,7 @@ def post_create(request):
     })
 
 
-@login_required
+@login_required(login_url='login')
 def post_edit(request, slug):
     """Edit an existing blog post"""
     post = get_object_or_404(BlogPost, slug=slug)
@@ -143,7 +143,7 @@ def post_edit(request, slug):
     })
 
 
-@login_required
+@login_required(login_url='login')
 def post_delete(request, slug):
     """Delete a blog post"""
     post = get_object_or_404(BlogPost, slug=slug)
@@ -161,7 +161,7 @@ def post_delete(request, slug):
     return render(request, 'blog/post_confirm_delete.html', {'post': post})
 
 
-@login_required
+@login_required(login_url='login')
 def my_posts(request):
     """User's own blog posts"""
     posts = BlogPost.objects.filter(author=request.user)
@@ -214,7 +214,7 @@ def tag_posts(request, slug):
     return render(request, 'blog/tag_posts.html', context)
 
 
-@login_required
+@login_required(login_url='login')
 @require_POST
 def add_comment(request, slug):
     """Add a comment to a blog post"""

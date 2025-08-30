@@ -20,6 +20,8 @@ def home(request):
     return render(request, 'base/index.html',data)
 
 def login_view(request):
+    next_redirect = request.GET.get('next')
+    print(next_redirect)
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -27,11 +29,14 @@ def login_view(request):
         
         user = authenticate(request, username=username, password=password)
         
+        print(next_redirect)
         if user is not None:
             login(request, user)
             # If remember me is not checked, expire session when browser closes
             if not remember:
                 request.session.set_expiry(0)
+            if next_redirect:
+                return redirect(next_redirect)        
             return redirect('home')
         else:
             error_message = 'Invalid username or password'
