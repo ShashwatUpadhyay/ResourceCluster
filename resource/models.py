@@ -19,7 +19,7 @@ class Subject(BaseModel):
         return self.name
     class Meta:
         db_table = 'subject'
-        ordering = ['-name']
+        ordering = ['name']
 
 class Session(BaseModel):
     name = models.CharField(max_length=255)
