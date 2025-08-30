@@ -58,3 +58,5 @@ class Resource(BaseModel):
     class Meta:
         db_table = 'resource'
         ordering = ['-created_at']
+
+
