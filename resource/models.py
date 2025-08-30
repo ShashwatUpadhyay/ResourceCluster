@@ -19,6 +19,7 @@ class Subject(BaseModel):
         return self.name
     class Meta:
         db_table = 'subject'
+        ordering = ['-created_at']
 
 class Session(BaseModel):
     name = models.CharField(max_length=255)
@@ -26,6 +27,8 @@ class Session(BaseModel):
         return self.name
     class Meta:
         db_table = 'session'
+        ordering = ['name']
+        
 
 class Tag(BaseModel):
     name = models.CharField(max_length=255)
