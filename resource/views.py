@@ -14,7 +14,6 @@ class ListResourcesAPIView(APIView):
         subject = request.GET.get('subject')
         session = request.GET.get('session')
         semester = request.GET.get('semester')
-        print(course, subject, session, semester)
         resources = Resource.objects.all()
         if course:
             resources = resources.filter(course__uid=course)

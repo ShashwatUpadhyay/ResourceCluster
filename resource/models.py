@@ -14,7 +14,7 @@ class Cource(BaseModel):
 
 class Subject(BaseModel):
     name = models.CharField(max_length=255)
-    course = models.ForeignKey('Cource', on_delete=models.CASCADE)
+    course = models.ForeignKey('Cource', on_delete=models.CASCADE, null=True,blank=True)
     def __str__(self):
         return self.name
     class Meta:
